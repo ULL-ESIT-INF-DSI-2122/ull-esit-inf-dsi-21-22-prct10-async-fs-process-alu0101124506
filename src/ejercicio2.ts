@@ -6,30 +6,30 @@ import { spawn } from 'child_process';
 
  yargs.command( {
   command: 'analyze',
-  describe: 'Muestra por consola el número de líneas, palabras y caracteres que posee un fichero que se le pase como parámetro.',
+  describe: 'Nos da el numero de lineas, palabras o carectares que tiene un fichero',
   builder: {
     pipe: {
-      describe: 'Opción para activar o desactivar el método pipe.',
+      describe: 'Utilizacion de pipes',
       demandOption: true,
       type: 'string',
     },
     fichero: {
-      describe: 'Fichero que se quiere analizar.',
+      describe: 'Nombre del fichero',
       demandOption: true,
       type: 'string',
     },
     lineas: {
-      describe: 'Opción para contar el número de líneas que posee el fichero.',
+      describe: 'Activar el numero de lineas',
       demandOption: false,
       type: 'boolean',
     },
     palabras: {
-      describe: 'Opción para contar el número de palabras que posee el fichero.',
+      describe: 'Activar el numero de palabras',
       demandOption: false,
       type: 'boolean',
     },
     caracteres: {
-      describe: 'Opción para contar el número de caracteres que posee el fichero.',
+      describe: 'Activar el numero de caracteres',
       demandOption: false,
       type: 'boolean',
     },
@@ -44,7 +44,7 @@ import { spawn } from 'child_process';
       else if (argv.pipe.toLocaleLowerCase() == "no")
         sinPipe(comando, argv.fichero);
       else
-        console.log("\nERROR: Ha introducido mal el parámetro pipe, por favor, introduzca Si o No.\n");
+        console.log("\nERROR: Ha introducido mal el parámetro pipe. Por favor, introduzca 'si' o 'no'\n");
 
       if (argv.lineas == true)
         comando.push("lineas");
@@ -53,7 +53,7 @@ import { spawn } from 'child_process';
       if (argv.caracteres == true)
         comando.push("caracteres");
       if (comando.length == 0)
-        console.log("\nERROR: No ha introducido ninguna opción a analizar.\n");
+        console.log("\nERROR: No ha introducido ninguna opción a analizar. Por favor elija al menos una\n");
     }
   },
 }).parse();
@@ -62,7 +62,7 @@ import { spawn } from 'child_process';
 function conPipe(entrada: string[], nombreFichero: string) {
   fs.access(nombreFichero, (err) => {
     if (err)
-      console.log("\nERROR: El fichero que ha introducido no existe.\n");
+      console.log("\nERROR: El fichero introducido no existe\n");
     else {
       let echo = spawn('echo', [`\nAbriendo el fichero: ${nombreFichero}\n`]);
       let wc = spawn('wc', [`${nombreFichero}`]);
@@ -74,15 +74,15 @@ function conPipe(entrada: string[], nombreFichero: string) {
         let outputArray = wcOutput .split(/\s+/);
         entrada.forEach((element) => {
           if (element == "lineas") {
-            const echo = spawn('echo', [`El fichero contiene ${parseInt(outputArray[1])+1} líneas.\n`]);
+            const echo = spawn('echo', [`El fichero '${nombreFichero}', contiene ${parseInt(outputArray[1])+1} líneas.\n`]);
             echo.stdout.pipe(process.stdout);
           }
           if (element == "palabras") {
-            const echo = spawn('echo', [`El fichero contiene ${outputArray[2]} palabras.\n`]);
+            const echo = spawn('echo', [`El fichero '${nombreFichero}', contiene ${outputArray[2]} palabras.\n`]);
             echo.stdout.pipe(process.stdout);
           }
           if (element == "caracteres") {
-            const echo = spawn('echo', [`El fichero contiene ${outputArray[3]} caracteres.\n`]);
+            const echo = spawn('echo', [`El fichero '${nombreFichero}', contiene ${outputArray[3]} caracteres.\n`]);
             echo.stdout.pipe(process.stdout);
           }
         });
@@ -106,11 +106,11 @@ function sinPipe(entrada: string[], nombreFichero: string) {
         const outputArray = wcOutput .split(/\s+/);
         entrada.forEach((element) => {
           if (element == "lineas")
-            console.log(`El fichero contiene ${parseInt(outputArray[1])+1} líneas.\n`);
+            console.log(`El fichero '${nombreFichero}', contiene ${parseInt(outputArray[1])+1} líneas.\n`);
           if (element == "palabras")
-            console.log(`El fichero contiene ${outputArray[2]} palabras.\n`);
+            console.log(`El fichero '${nombreFichero}', contiene ${outputArray[2]} palabras.\n`);
           if (element == "caracteres")
-            console.log(`El fichero contiene ${outputArray[3]} caracteres.\n`);
+            console.log(`El fichero '${nombreFichero}', contiene ${outputArray[3]} caracteres.\n`);
         });
       });
     }
