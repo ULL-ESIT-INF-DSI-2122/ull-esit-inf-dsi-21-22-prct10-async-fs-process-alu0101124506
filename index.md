@@ -349,3 +349,109 @@ function sinPipe(entrada: string[], nombreFichero: string) {
 Ejemplo de funcionamiento:
 
 ![example](/img/3.png)
+
+
+
+### Ejercicio 3
+
+Utilizando las clases creadas en la practica anterior, vamos a proceder a realizar otra clase, la cual nos ayudara a vigilar los cambios que puedan ocurrir
+
+````Typescript
+const fs = require('fs');
+const chalk = require('chalk');
+
+const error = chalk.red;
+const good = chalk.green;
+
+export class Watcher {
+  constructor(private name: string, private rute: string) {
+    this.watchNote();
+  }
+
+  watchNote () {
+    let check = this.checkDir(this.name, this.rute);
+    if (check == false) {
+      console.log(error(`\nEl directorio del usuario ${this.name} no existe`));
+      return -1;
+    } 
+    else {
+      console.log(good(`\nEsperando por cambios...\n`));
+      const watcher = fs.watch(`${this.rute}/${this.name}`);
+      let event: boolean = false;
+      watcher.on('change', (eventType, filename) => {
+        switch (eventType) {
+          case 'rename':
+            check = this.checkDir(filename, `${this.rute}/${this.name}`);
+            if (check) {
+              console.log(`La nota ${filename} ha sido creada`);
+            } else {
+              console.log(`La nota ${filename} ha sido eliminada`);
+            }
+            break;
+          case 'change':
+            console.log(`La nota ${filename} ha sido modificada`);
+            break;  
+        }
+        console.log(good(`\nEsperando por cambios...\n`));
+      });
+      return;
+    }
+  }
+
+  checkDir (name: string, rute: string): boolean {
+    try {
+      fs.accessSync(`${rute}/${name}`, fs.constants.F_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+````
+
+Ademas tenemos la funcion principal, la cual le pasaremos el nombre del usuario y la ruta en donde se almacenan sus respectivas notas
+
+````Typescript
+const chalk = require('chalk');
+const yargs = require('yargs');
+const fs = require('fs');
+import {Watcher} from './watcher';
+
+const error = chalk.red;
+
+
+ function main(): void {
+  yargs.command({
+    command: 'watch',
+    describe: 'Vigila cambios en los archivos del usuario',
+    builder: {
+      user: {
+        describe: 'Nombre de usuario',
+        demandOption: true,
+        type: 'string',
+      },
+      rute: {
+        describe: 'Ruta donde se encuentran los usurios',
+        demandOption: true,
+        type: 'string',
+      },  
+    },
+    handler(argv) {
+      if (typeof argv.user === 'string' && typeof argv.rute === 'string') {
+        const newWatcher = new Watcher(argv.user, argv.rute);
+      } else {
+        console.log(error("Comando incorrecto"));
+      }
+    },
+  });
+  yargs.parse();
+ }
+
+ main();
+````
+
+Combinando todo esto, conseguimos que este programa vigile las notas que se encuentran en la ruta dada, bajo el nombre del usuario, de esta manera, cada vez que se agregue, elimine o modifique una nota, seremos avisados por este programa.
+
+Aqui un ejemplo, en una terminal se ejecuta este programa, y en otra terminal, como se puede saber gracias al programa, eliminamos, modificamos y creamos una nota.
+
+![example](/img/4.png)

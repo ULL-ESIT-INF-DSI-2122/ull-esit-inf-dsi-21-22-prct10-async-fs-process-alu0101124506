@@ -15,13 +15,11 @@ const error = chalk.red;
         describe: 'Nombre de usuario',
         demandOption: true,
         type: 'string',
-        alias: 'u',
       },
       rute: {
         describe: 'Ruta donde se encuentran los usurios',
         demandOption: true,
         type: 'string',
-        alias: 'r',
       },  
     },
     handler(argv) {
