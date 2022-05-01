@@ -348,4 +348,4 @@ function sinPipe(entrada: string[], nombreFichero: string) {
 
 Ejemplo de funcionamiento:
 
-![example](/img/2.png)
+![example](/img/3.png)
