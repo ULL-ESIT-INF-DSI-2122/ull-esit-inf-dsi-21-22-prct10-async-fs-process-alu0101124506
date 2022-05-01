@@ -221,6 +221,7 @@ Y asi nos quedaria la terminal al final:
 ### Ejercicio 2
 
 En este segundo ejercicio, lo primero que hice fue crear el comando `analyze`, el cual está diseñado para recibir hasta 5 parámetros por consola: `pipe`(Para activar o desactivar el método pipe, solo tienes que poner "si" para usarlo y "no" para no usarlo), `fichero`(El fichero que quieres analizar), `lineas`(El número de líneas que posee el fichero, se uttiliza poniendo `true`), `palabras`(El número de palabras que posee el fichero,  se uttiliza poniendo `true`) y `caracteres`(El número de caracteres que posee el fichero,  se uttiliza poniendo `true`). Las dos primeras opciones son obligatorias, mientras que las siguientes 3 son opcionales, puedes pedir solo las líneas, las palabras o los caracteres o cualquier combinacion de los anteriores, pero al menos una opcion hay que activar. 
+Luego llegamos al manejador del comando, lo primero que hago es comprobar que el tipo de `pipe` y de `fichero` sea `string`. Después detecto si en `pipe` el usuario introdujo "si" o "no", en caso de no detectar una respuesta correcta devuelve un mensaje de error. Si detecta un "si" llama a la función `conPipe()` y en caso contrario a la función `sinPipe()`. 
 
 ````Typescript
  yargs.command( {
@@ -253,11 +254,6 @@ En este segundo ejercicio, lo primero que hice fue crear el comando `analyze`, e
       type: 'boolean',
     },
   },
-````
-
-Ahora llegamos al manejador del comando, lo primero que hago es comprobar que el tipo de `pipe` y de `fichero` sea `string`. Después detecto si en `pipe` el usuario introdujo "si" o "no", en caso de no detectar una respuesta correcta devuelve un mensaje de error en color rojo. Si detecta un "si" llama a la función `conPipe()` y en caso contrario a la función `sinPipe()`. Los siguientes `if` sirven para saber qué parámetros opcionales quiso introducir el usuario y así mostrarlo de forma correcta.
-
-````Typescript
   handler(argv) {
     if ((typeof argv.pipe === "string") && (typeof argv.fichero === "string")) {
 
@@ -268,7 +264,7 @@ Ahora llegamos al manejador del comando, lo primero que hago es comprobar que el
       else if (argv.pipe.toLocaleLowerCase() == "no")
         sinPipe(comando, argv.fichero);
       else
-        console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: Ha introducido mal el parámetro pipe, por favor, introduzca Si o No.\n"));
+        console.log("\nERROR: Ha introducido mal el parámetro pipe, por favor, introduzca Si o No.\n");
 
       if (argv.lineas == true)
         comando.push("lineas");
@@ -277,19 +273,21 @@ Ahora llegamos al manejador del comando, lo primero que hago es comprobar que el
       if (argv.caracteres == true)
         comando.push("caracteres");
       if (comando.length == 0)
-        console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: No ha introducido ninguna opción a analizar.\n"));
+        console.log("\nERROR: No ha introducido ninguna opción a analizar.\n");
     }
   },
 }).parse();
 ````
 
-Lo siguiente que explicaré es el método `conPipe()`, que, como ya he dicho antes, se ejecuta solo si el usuario introdujo un sí en el parámetro `pipe`. Lo primero que compruebo es que mediante la función `fs.access()` que se pueda acceder al fichero que ha pasado el usuario, en caso de no poder se mostrará por pantalla un mensaje de error. En el otro caso de que sí se pueda acceder, primero declaro `echo`, que es el encargado de mostrar el contenido del fichero y después `wc` que es el proceso encargado de mostrar el número de líneas. Luego añadimos los datos que genera ese proceso a `wcOutput` gracias a la función `wc.stdout.on('data')`. Con la función `.on('close')` mostramos el resultado del proceso, si el usuario introdujo solo como parámetro a líneas, con el `if` comprobamos que lo introdujo e imprime por pantalla el número de líneas, lo mismo sería para palabras y letras.
+
+Segidamente tenemos la funcion `conPipe()`, que se ejecuta solo si el usuario introdujo un sí en el parámetro `pipe`. 
+
 
 ````Typescript
 function conPipe(entrada: string[], nombreFichero: string) {
   fs.access(nombreFichero, (err) => {
     if (err)
-      console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: El fichero que ha introducido no existe.\n"));
+      console.log("\nERROR: El fichero que ha introducido no existe.\n");
     else {
       let echo = spawn('echo', [`\nAbriendo el fichero: ${nombreFichero}\n`]);
       let wc = spawn('wc', [`${nombreFichero}`]);
@@ -325,7 +323,7 @@ A continuación, pasamos a la función `sinPipe()`, la cual hace exactamente lo 
 function sinPipe(entrada: string[], nombreFichero: string) {
   fs.access(nombreFichero, (err) => {
     if (err)
-      console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: El fichero que ha introducido no existe.\n"));
+      console.log("\nERROR: El fichero que ha introducido no existe.\n");
     else {
       let wc = spawn('wc', [`${nombreFichero}`]);
       console.log(`\n${nombreFichero}\n`);
