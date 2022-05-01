@@ -10,4 +10,4 @@ Esta practica tiene como objetivo familializarse con la API asíncrona y la de c
 
 - Para acceder al informe de la practica: https://github.com/ULL-ESIT-INF-DSI-2122/ull-esit-inf-dsi-21-22-prct10-async-fs-process-alu0101124506/blob/master/index.md
 
-- Para acceder al informe de la practica a traves de GitHub Pages: 
+- Para acceder al informe de la practica a traves de GitHub Pages: https://ull-esit-inf-dsi-2122.github.io/ull-esit-inf-dsi-21-22-prct10-async-fs-process-alu0101124506/
