@@ -3,6 +3,8 @@ import * as chalk from 'chalk';
 import yargs = require('yargs');
 import { spawn } from 'child_process';
 
+const error = chalk.red;
+const good = chalk.green;
 
  yargs.command( {
   command: 'analyze',
@@ -44,7 +46,7 @@ import { spawn } from 'child_process';
       else if (argv.pipe.toLocaleLowerCase() == "no")
         sinPipe(comando, argv.fichero);
       else
-        console.log("\nERROR: Ha introducido mal el parámetro pipe. Por favor, introduzca 'si' o 'no'\n");
+        console.log(error("\nHa introducido mal el parámetro pipe. Por favor, introduzca 'si' o 'no'\n"));
 
       if (argv.lineas == true)
         comando.push("lineas");
@@ -53,7 +55,7 @@ import { spawn } from 'child_process';
       if (argv.caracteres == true)
         comando.push("caracteres");
       if (comando.length == 0)
-        console.log("\nERROR: No ha introducido ninguna opción a analizar. Por favor elija al menos una\n");
+        console.log(error("\nNo ha introducido ninguna opción a analizar. Por favor elija al menos una\n"));
     }
   },
 }).parse();
@@ -62,7 +64,7 @@ import { spawn } from 'child_process';
 function conPipe(entrada: string[], nombreFichero: string) {
   fs.access(nombreFichero, (err) => {
     if (err)
-      console.log("\nERROR: El fichero introducido no existe\n");
+      console.log(error("\nEl fichero introducido no existe\n"));
     else {
       let echo = spawn('echo', [`\nAbriendo el fichero: ${nombreFichero}\n`]);
       let wc = spawn('wc', [`${nombreFichero}`]);
@@ -95,7 +97,7 @@ function conPipe(entrada: string[], nombreFichero: string) {
 function sinPipe(entrada: string[], nombreFichero: string) {
   fs.access(nombreFichero, (err) => {
     if (err)
-      console.log("\nERROR: El fichero que ha introducido no existe.\n");
+      console.log(error("\nEl fichero que ha introducido no existe.\n"));
     else {
       let wc = spawn('wc', [`${nombreFichero}`]);
       console.log(`\n${nombreFichero}\n`);
