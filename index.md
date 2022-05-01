@@ -211,3 +211,139 @@ Ahora queremos que pase por el `else` por lo que le pasamos el archivo `ejercici
 * Registro de eventos: --
 * Cola de manejadores: --
 * Console: `console.log(Starting to watch file ${filename})`, `console.log(File ${filename} is no longer watched)`, `console.log(File ${filename} has been modified somehow)`, `console.log(File ${filename} has been modified somehow)`
+
+Y asi nos quedaria la terminal al final:
+
+![final](/img/1.png)
+
+
+
+### Ejercicio 2
+
+En este segundo ejercicio, lo primero que hice fue crear el comando `analyze`, el cual está diseñado para recibir hasta 5 parámetros por consola: `pipe`(Para activar o desactivar el método pipe, solo tienes que poner "si" para usarlo y "no" para no usarlo), `fichero`(El fichero que quieres analizar), `lineas`(El número de líneas que posee el fichero, se uttiliza poniendo `true`), `palabras`(El número de palabras que posee el fichero,  se uttiliza poniendo `true`) y `caracteres`(El número de caracteres que posee el fichero,  se uttiliza poniendo `true`). Las dos primeras opciones son obligatorias, mientras que las siguientes 3 son opcionales, puedes pedir solo las líneas, las palabras o los caracteres o cualquier combinacion de los anteriores, pero al menos una opcion hay que activar. 
+
+````Typescript
+ yargs.command( {
+  command: 'analyze',
+  describe: 'Muestra por consola el número de líneas, palabras y caracteres que posee un fichero que se le pase como parámetro.',
+  builder: {
+    pipe: {
+      describe: 'Opción para activar o desactivar el método pipe.',
+      demandOption: true,
+      type: 'string',
+    },
+    fichero: {
+      describe: 'Fichero que se quiere analizar.',
+      demandOption: true,
+      type: 'string',
+    },
+    lineas: {
+      describe: 'Opción para contar el número de líneas que posee el fichero.',
+      demandOption: false,
+      type: 'boolean',
+    },
+    palabras: {
+      describe: 'Opción para contar el número de palabras que posee el fichero.',
+      demandOption: false,
+      type: 'boolean',
+    },
+    caracteres: {
+      describe: 'Opción para contar el número de caracteres que posee el fichero.',
+      demandOption: false,
+      type: 'boolean',
+    },
+  },
+````
+
+Ahora llegamos al manejador del comando, lo primero que hago es comprobar que el tipo de `pipe` y de `fichero` sea `string`. Después detecto si en `pipe` el usuario introdujo "si" o "no", en caso de no detectar una respuesta correcta devuelve un mensaje de error en color rojo. Si detecta un "si" llama a la función `conPipe()` y en caso contrario a la función `sinPipe()`. Los siguientes `if` sirven para saber qué parámetros opcionales quiso introducir el usuario y así mostrarlo de forma correcta.
+
+````Typescript
+  handler(argv) {
+    if ((typeof argv.pipe === "string") && (typeof argv.fichero === "string")) {
+
+      let comando: string[] = [];
+
+      if (argv.pipe.toLocaleLowerCase() == "si")
+        conPipe(comando, argv.fichero);
+      else if (argv.pipe.toLocaleLowerCase() == "no")
+        sinPipe(comando, argv.fichero);
+      else
+        console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: Ha introducido mal el parámetro pipe, por favor, introduzca Si o No.\n"));
+
+      if (argv.lineas == true)
+        comando.push("lineas");
+      if (argv.palabras == true)
+        comando.push("palabras");
+      if (argv.caracteres == true)
+        comando.push("caracteres");
+      if (comando.length == 0)
+        console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: No ha introducido ninguna opción a analizar.\n"));
+    }
+  },
+}).parse();
+````
+
+Lo siguiente que explicaré es el método `conPipe()`, que, como ya he dicho antes, se ejecuta solo si el usuario introdujo un sí en el parámetro `pipe`. Lo primero que compruebo es que mediante la función `fs.access()` que se pueda acceder al fichero que ha pasado el usuario, en caso de no poder se mostrará por pantalla un mensaje de error. En el otro caso de que sí se pueda acceder, primero declaro `echo`, que es el encargado de mostrar el contenido del fichero y después `wc` que es el proceso encargado de mostrar el número de líneas. Luego añadimos los datos que genera ese proceso a `wcOutput` gracias a la función `wc.stdout.on('data')`. Con la función `.on('close')` mostramos el resultado del proceso, si el usuario introdujo solo como parámetro a líneas, con el `if` comprobamos que lo introdujo e imprime por pantalla el número de líneas, lo mismo sería para palabras y letras.
+
+````Typescript
+function conPipe(entrada: string[], nombreFichero: string) {
+  fs.access(nombreFichero, (err) => {
+    if (err)
+      console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: El fichero que ha introducido no existe.\n"));
+    else {
+      let echo = spawn('echo', [`\nAbriendo el fichero: ${nombreFichero}\n`]);
+      let wc = spawn('wc', [`${nombreFichero}`]);
+      echo.stdout.pipe(process.stdout);
+      let wcOutput  = '';
+      wc.stdout.on('data', (piece) => wcOutput  += piece);
+
+      wc.on('close', () => {
+        let outputArray = wcOutput .split(/\s+/);
+        entrada.forEach((element) => {
+          if (element == "lineas") {
+            const echo = spawn('echo', [`El fichero contiene ${parseInt(outputArray[1])+1} líneas.\n`]);
+            echo.stdout.pipe(process.stdout);
+          }
+          if (element == "palabras") {
+            const echo = spawn('echo', [`El fichero contiene ${outputArray[2]} palabras.\n`]);
+            echo.stdout.pipe(process.stdout);
+          }
+          if (element == "caracteres") {
+            const echo = spawn('echo', [`El fichero contiene ${outputArray[3]} caracteres.\n`]);
+            echo.stdout.pipe(process.stdout);
+          }
+        });
+      });
+    }
+  });
+}
+````
+
+A continuación, pasamos a la función `sinPipe()`, la cual hace exactamente lo mismo que el método anterior pero sin hacer uso del método `pipe` de un `Stream`. Al principio hago lo mismo solo que a la hora de mostrarlo no hago uso de `spawn('echo')` si no de simplemente `console.log()`.
+
+````Typescript
+function sinPipe(entrada: string[], nombreFichero: string) {
+  fs.access(nombreFichero, (err) => {
+    if (err)
+      console.log(chalk.rgb(255, 0, 0).inverse("\nERROR: El fichero que ha introducido no existe.\n"));
+    else {
+      let wc = spawn('wc', [`${nombreFichero}`]);
+      console.log(`\n${nombreFichero}\n`);
+      let wcOutput  = '';
+      wc.stdout.on('data', (piece) => wcOutput  += piece);
+
+      wc.on('close', () => {
+        const outputArray = wcOutput .split(/\s+/);
+        entrada.forEach((element) => {
+          if (element == "lineas")
+            console.log(`El fichero contiene ${parseInt(outputArray[1])+1} líneas.\n`);
+          if (element == "palabras")
+            console.log(`El fichero contiene ${outputArray[2]} palabras.\n`);
+          if (element == "caracteres")
+            console.log(`El fichero contiene ${outputArray[3]} caracteres.\n`);
+        });
+      });
+    }
+  });
+}
+``s``

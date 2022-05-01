@@ -39,9 +39,9 @@ import { spawn } from 'child_process';
 
       let comando: string[] = [];
 
-      if ((argv.pipe == "si") || (argv.pipe == "Si"))
+      if (argv.pipe.toLocaleLowerCase() == "si")
         conPipe(comando, argv.fichero);
-      else if ((argv.pipe == "no") || (argv.pipe == "No"))
+      else if (argv.pipe.toLocaleLowerCase() == "no")
         sinPipe(comando, argv.fichero);
       else
         console.log("\nERROR: Ha introducido mal el parámetro pipe, por favor, introduzca Si o No.\n");
