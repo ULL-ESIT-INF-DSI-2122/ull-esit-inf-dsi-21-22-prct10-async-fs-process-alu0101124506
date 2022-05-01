@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as chalk from 'chalk';
+const chalk = require('chalk');
 import yargs = require('yargs');
 import { spawn } from 'child_process';
 
